@@ -21,7 +21,6 @@ public class Player : MonoBehaviour
     [SerializeField] private float _groundScaleX = 1.5f;
     [SerializeField] private float _groundScaleY = 0.7f;
     [SerializeField] private float _groundAnimationDuration = 0.3f;
-    
     [SerializeField] private Ease ease = Ease.OutBack;
 
     private float _currentSpeed;
