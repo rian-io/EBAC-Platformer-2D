@@ -13,6 +13,6 @@ public class EnemyBase : MonoBehaviour
         if (health != null)
         {
             health.Damage(_damage);
-        }    
+        }
     }
 }
