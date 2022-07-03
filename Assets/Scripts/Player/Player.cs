@@ -7,93 +7,65 @@ public class Player : MonoBehaviour
 {
     [Header("Components")]
     [SerializeField] private Rigidbody2D _rb;
+    [SerializeField] private Animator _animator;
 
     [Header("Movement")]
-    [SerializeField] private Vector2 _friction = new Vector2(0.1f, 0f);
     [SerializeField] private float _speed = 5f;
     [SerializeField] private float _runningSpeed = 10f;
     [SerializeField] private float _jumpForce = 2f;
 
     [Header("Animation")]
-    [SerializeField] private float _jumpScaleX = 0.7f;
-    [SerializeField] private float _jumpScaleY = 1.5f;
-    [SerializeField] private float _jumpAnimationDuration = 0.3f;
-    [SerializeField] private float _groundScaleX = 1.5f;
-    [SerializeField] private float _groundScaleY = 0.7f;
-    [SerializeField] private float _groundAnimationDuration = 0.3f;
-    [SerializeField] private Ease ease = Ease.OutBack;
+    [SerializeField] private float _turnDuration = 0.3f;
+
+    private Vector3 _leftDirection = new Vector3(-1, 1, 1);
+    private Vector3 _rightDirection = new Vector3(1, 1, 1);
 
     private float _currentSpeed;
-
+    private float _speedModifier;
     private bool _isGrounded;
 
     private void Update()
     {
         HandleJump();
         HandleMoviment();
+        HandleAnimation();
     }
 
     private void OnCollisionEnter2D(Collision2D other) {
         if (!_isGrounded) {
             _isGrounded = true;
-
-            transform.DOScaleX(_groundScaleX, _groundAnimationDuration).SetEase(ease).OnComplete(() => {
-                transform.DOScaleX(1, _groundAnimationDuration).SetEase(ease);
-            });
-            transform.DOScaleY(_groundScaleY, _groundAnimationDuration).SetEase(ease).OnComplete(() => {
-                transform.DOScaleY(1, _groundAnimationDuration).SetEase(ease);
-            });
+            _animator.ResetTrigger("Jumping");
         }
     }
 
     private void HandleMoviment()
     {
-        if (Input.GetKey(KeyCode.LeftControl))
-        {
-            _currentSpeed = _runningSpeed;
-        }
-        else
-        {
-            _currentSpeed = _speed;
-        }
+        _speedModifier = Input.GetKey(KeyCode.LeftShift) ? _runningSpeed : _speed;
+        _currentSpeed = Input.GetAxisRaw("Horizontal") * _speedModifier;
 
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            _rb.velocity = new Vector2(-_currentSpeed, _rb.velocity.y);
-        }
-        else if (Input.GetKey(KeyCode.RightArrow))
-        {
-            _rb.velocity = new Vector2(_currentSpeed, _rb.velocity.y);
-        }
+        if (_currentSpeed > 0)
+            transform.DOScale(_rightDirection, _turnDuration);
+        else if (_currentSpeed < 0)
+            transform.DOScale(_leftDirection, _turnDuration);
 
-        if (_rb.velocity.x > 0)
-        {
-            _rb.velocity -= _friction;
-        }
-        else if (_rb.velocity.x < 0)
-        {
-            _rb.velocity += _friction;
-        }
+        _rb.velocity = new Vector2(_currentSpeed, _rb.velocity.y);
     }
 
     private void HandleJump()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (_isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             _isGrounded = false;
-
             _rb.velocity = Vector2.up * _jumpForce;
-            transform.localScale = Vector2.one;
-
-            DOTween.Kill(transform);
-
-            HandleScaleJump();
+            _animator.SetTrigger("Jumping");
         }
     }
 
-    private void HandleScaleJump()
+    private void HandleAnimation()
     {
-        transform.DOScaleX(_jumpScaleX, _jumpAnimationDuration).SetLoops(2, LoopType.Yoyo).SetEase(ease);
-        transform.DOScaleY(_jumpScaleY, _jumpAnimationDuration).SetLoops(2, LoopType.Yoyo).SetEase(ease);
+        if (_isGrounded && _rb.velocity.x != 0.0f)
+            _animator.SetBool("Walking", true);
+        else
+            _animator.SetBool("Walking", false);
     }
 }
