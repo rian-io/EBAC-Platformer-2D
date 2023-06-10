@@ -5,8 +5,10 @@ using DG.Tweening;
 
 public class ItemCollactableBase : MonoBehaviour
 {
+    private const string PLAYER_TAG = "Player";
+
     private void OnTriggerEnter2D(Collider2D other) {
-        if (other.gameObject.CompareTag("Player"))
+        if (other.gameObject.CompareTag(PLAYER_TAG))
         {
             Collect();
         }

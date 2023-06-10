@@ -10,10 +10,20 @@ public class HealthBase : MonoBehaviour
 
     [SerializeField] private bool _destroyOnDeath = true;
 
+    [SerializeField] private float _delayToKill = 4000f;
+
+    [SerializeField] private FlashColour _flashColour;
+
+    [SerializeField] private Animator animator;
+
     private bool _isDead = false;
 
     private void Awake() {
         Init();
+        if (_flashColour == null)
+        {
+            _flashColour = GetComponent<FlashColour>();
+        }
     }
 
     public void Init()
@@ -27,6 +37,12 @@ public class HealthBase : MonoBehaviour
         if (_isDead) return;
 
         _currentHealth -= damage;
+
+        if(_flashColour != null)
+        {
+            _flashColour.Flash();
+        }
+
         if (_currentHealth <= 0)
         {
             Die();
@@ -39,7 +55,8 @@ public class HealthBase : MonoBehaviour
 
         if (_destroyOnDeath)
         {
-            Destroy(gameObject);
+            animator.SetTrigger("Death");
+            Destroy(gameObject, _delayToKill);
         }
     }
 }

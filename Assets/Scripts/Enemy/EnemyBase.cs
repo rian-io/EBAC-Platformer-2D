@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class EnemyBase : MonoBehaviour
 {
+    public const string TRIGGER_ATTACK = "Attack";
+
     [SerializeField] private int _damage = 10;
+
+    [SerializeField] private Animator animator;
 
     private void OnCollisionEnter2D(Collision2D other)
     {
@@ -13,6 +17,12 @@ public class EnemyBase : MonoBehaviour
         if (health != null)
         {
             health.Damage(_damage);
+            PlayAttackAnimation();
         }
+    }
+
+    private void PlayAttackAnimation()
+    {
+        animator.SetTrigger(TRIGGER_ATTACK);
     }
 }
